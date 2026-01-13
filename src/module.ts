@@ -39,6 +39,9 @@ export default defineNuxtModule<ModuleOptions>({
         pattern: '*.sql',
       })
     })
+    nuxt.hook('nitro:prepare:types', ({ references }) => {
+      references.push({ path: resolve('./runtime/server/types.d.ts') })
+    })
 
     addServerImports({
       name: 'useDrizzle',
