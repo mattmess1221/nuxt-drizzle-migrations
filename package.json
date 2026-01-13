@@ -1,0 +1,68 @@
+{
+  "name": "nuxt-drizzle-migrations",
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.0",
+  "description": "Automatic Drizzle migrations in Nuxt",
+  "author": "Matthew Messinger <mattmess1221@gmail.com>",
+  "license": "MIT",
+  "repository": "https://github.com/mattmess1221/nuxt-drizzle-migrations",
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "nitropack",
+    "drizzle",
+    "database",
+    "migrations"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
+    }
+  },
+  "main": "./dist/module.mjs",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "nuxt-module-build build",
+    "dev": "pnpm run dev:prepare && nuxi dev playground",
+    "dev:build": "nuxi build playground",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
+    "dev:db:generate": "cd playground && drizzle-kit generate",
+    "release": "pnpm run lint && pnpm run test && changelogen --release && pnpm publish && git push --follow-tags",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^4.2.2",
+    "consola": "^3.4.2",
+    "ohash": "^2.0.11",
+    "pathe": "^2.0.3",
+    "unstorage": "^1.17.3"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^7.0.0",
+    "@libsql/client": "^0.17.0",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/test-utils": "^3.23.0",
+    "changelogen": "^0.6.2",
+    "drizzle-kit": "^0.31.8",
+    "drizzle-orm": "^0.45.1",
+    "eslint": "^9.39.2",
+    "nuxt": "^4.2.2",
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.17",
+    "vue-tsc": "^3.2.2"
+  }
+}
