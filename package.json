@@ -38,7 +38,7 @@
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
     "dev:db:generate": "cd playground && drizzle-kit generate",
-    "release": "pnpm run lint && pnpm run test && changelogen --release && pnpm publish && git push --follow-tags",
+    "release": "changelogen --release && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch",

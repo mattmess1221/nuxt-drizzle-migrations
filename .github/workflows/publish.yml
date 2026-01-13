@@ -1,0 +1,28 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - run: npm i -g --force corepack@latest && corepack enable
+
+      - name: Install dependencies
+        run: pnpm i --prod
+
+      - name: Publish package
+        run: pnpm publish
