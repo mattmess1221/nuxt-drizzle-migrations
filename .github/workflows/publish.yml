@@ -19,10 +19,8 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - run: npm i -g --force corepack@latest && corepack enable
-
       - name: Install dependencies
-        run: pnpm i --prod
+        run: npm ci
 
       - name: Publish package
-        run: pnpm publish
+        run: npm publish
