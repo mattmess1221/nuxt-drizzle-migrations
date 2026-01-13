@@ -26,5 +26,8 @@ jobs:
       - name: Install dependencies
         run: npx nypm@latest i
 
+      - name: Prepare package
+        run: npx nypm@latest run dev:prepare
+
       - name: Publish package
         run: npm publish
