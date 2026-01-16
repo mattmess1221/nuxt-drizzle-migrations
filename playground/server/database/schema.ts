@@ -5,3 +5,8 @@ export const todos = table('todos', {
   title: text().notNull(),
   completed: integer({ mode: 'boolean' }).notNull().default(false),
 })
+
+export const users = table('users', {
+  id: integer().primaryKey(),
+  name: text().notNull(),
+})
