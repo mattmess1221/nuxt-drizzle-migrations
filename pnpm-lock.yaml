@@ -14,6 +14,9 @@ importers:
       consola:
         specifier: ^3.4.2
         version: 3.4.2
+      jiti:
+        specifier: ^2.6.1
+        version: 2.6.1
       ohash:
         specifier: ^2.0.11
         version: 2.0.11

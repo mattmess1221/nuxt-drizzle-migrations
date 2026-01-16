@@ -1,11 +1,26 @@
-import { addServerImports, addServerPlugin, addServerTemplate, createResolver, defineNuxtModule, resolvePath } from '@nuxt/kit'
+import type { Config } from 'drizzle-kit'
+import { addServerImports, addServerPlugin, addServerTemplate, createResolver, defineNuxtModule, findPath, resolvePath, useLogger } from '@nuxt/kit'
+import { createJiti } from 'jiti'
 import { join } from 'pathe'
 import { name, version } from '../package.json'
 
+const logger = useLogger('drizzle-migrations')
+
 export interface ModuleOptions {
   /**
-   * Path to the directory containing migration files
-   * @default 'server/database/migrations'
+   * Path to the `drizzle.config.ts` file used for auto-detecting migration settings.
+   *
+   * Will auto-detect one of `['drizzle.config.ts', 'drizzle.config.js', 'drizzle.config.json']`
+   *
+   * @default auto-detect
+   */
+  configPath: string
+  /**
+   * Path to the directory containing migration files.
+   *
+   * If omitted, will try to read from {@linkcode configPath}.
+   *
+   * @default 'drizzle'
    */
   migrationsPath: string
   /**
@@ -15,7 +30,7 @@ export interface ModuleOptions {
   storageName: string
 }
 
-export default defineNuxtModule<ModuleOptions>({
+export default defineNuxtModule<ModuleOptions>().with({
   meta: {
     name,
     version,
@@ -25,12 +40,15 @@ export default defineNuxtModule<ModuleOptions>({
     },
   },
   defaults: {
-    migrationsPath: 'server/database/migrations',
     storageName: 'migrations',
   },
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
-    const migrationsPath = await resolvePath(options.migrationsPath)
+    const configPath = await resolveDrizzleConfigPath(options.configPath)
+    const drizzleConfig = configPath ? await readDrizzleConfig(configPath) : undefined
+
+    const migrationsPath = await resolvePath(options.migrationsPath ?? drizzleConfig?.out ?? 'drizzle')
+
     const journalFile = join(migrationsPath, 'meta/_journal.json')
     nuxt.hook('nitro:config', (config) => {
       config.serverAssets ??= []
@@ -64,3 +82,25 @@ export const storageName = ${JSON.stringify(options.storageName)}
     addServerPlugin(resolve('./runtime/server/plugin'))
   },
 })
+
+/**
+ * Resolves the Drizzle config path. If no path is provided, it attempts to auto-detect it.
+ */
+async function resolveDrizzleConfigPath(configPath?: string) {
+  return configPath
+    ? await resolvePath(configPath)
+    : await findPath('drizzle.config', {
+        extensions: ['.ts', '.js', '.json'],
+        type: 'file',
+      })
+}
+
+async function readDrizzleConfig(configPath: string) {
+  const jiti = createJiti(import.meta.url)
+  try {
+    return await jiti.import<Config>(configPath, { default: true })
+  }
+  catch (e) {
+    logger.error(`Failed to read Drizzle config at ${configPath}: ${(e as Error).message}`)
+  }
+}
