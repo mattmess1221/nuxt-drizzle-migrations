@@ -1,13 +1,17 @@
-import type { Migration } from './readMigration'
 import { journal, storageName } from '#drizzle-migrations'
-// eslint-disable-next-line ts/ban-ts-comment
-// @ts-ignore
 import { useDrizzle } from '#imports'
 import { consola } from 'consola'
 import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
-import { readMigrationStorage } from './readMigration'
+import { digest } from 'ohash'
 
 const logger = consola.withTag('drizzle-migrations')
+
+interface Migration {
+  sql: string[]
+  bps: boolean
+  folderMillis: number
+  hash: string
+}
 
 interface $Drizzle {
   dialect: {
@@ -21,8 +25,7 @@ export default defineNitroPlugin(async (nitroApp) => {
 
   logger.info('Running migrations...')
 
-  const storage = useStorage<string>(`assets:${storageName}`)
-  const migrations = await readMigrationStorage(storage, journal)
+  const migrations = await readMigrationStorage()
   await db.dialect.migrate(migrations, db.session, { })
 
   // post migration tasks can be added here
@@ -30,3 +33,27 @@ export default defineNitroPlugin(async (nitroApp) => {
 
   logger.success('Migrations complete.')
 })
+
+/**
+ * Reads migration queries from the given Unstorage instance.
+ * Taken from 'drizzle-orm/migrator' but modified to read from unstorage instead of fs.
+ */
+async function readMigrationStorage(): Promise<Migration[]> {
+  const storage = useStorage<string>(`assets:${storageName}`)
+  const migrationQueries: Migration[] = []
+  for (const journalEntry of journal.entries) {
+    const migrationPath = `${journalEntry.tag}.sql`
+    const query = await storage.getItem(migrationPath)
+    if (query === null) {
+      throw new Error(`No file ${migrationPath} found in storage`)
+    }
+    const result = query.split('--> statement-breakpoint')
+    migrationQueries.push({
+      sql: result,
+      bps: journalEntry.breakpoints,
+      folderMillis: journalEntry.when,
+      hash: digest(query),
+    })
+  }
+  return migrationQueries
+}

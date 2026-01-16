@@ -31,6 +31,7 @@ export default defineNuxtModule<ModuleOptions>({
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
     const migrationsPath = await resolvePath(options.migrationsPath)
+    const journalFile = join(migrationsPath, 'meta/_journal.json')
     nuxt.hook('nitro:config', (config) => {
       config.serverAssets ??= []
       config.serverAssets.push({
@@ -38,6 +39,9 @@ export default defineNuxtModule<ModuleOptions>({
         dir: migrationsPath,
         pattern: '*.sql',
       })
+
+      config.alias ??= {}
+      config.alias['#drizzle-migrations/journal'] = journalFile
     })
     nuxt.hook('nitro:prepare:types', ({ references }) => {
       references.push({ path: resolve('./runtime/server/types.d.ts') })
@@ -49,13 +53,11 @@ export default defineNuxtModule<ModuleOptions>({
       priority: -1,
     })
 
-    const journalFile = join(migrationsPath, 'meta/_journal.json')
-
     addServerTemplate({
       filename: '#drizzle-migrations',
       getContents: () => `
-import { useStorage } from 'nitropack/runtime'
-export { default as journal } from ${JSON.stringify(journalFile)} with { type: 'json' }
+export { default as journal } from '#drizzle-migrations/journal'
+
 export const storageName = ${JSON.stringify(options.storageName)}
       `,
     })
