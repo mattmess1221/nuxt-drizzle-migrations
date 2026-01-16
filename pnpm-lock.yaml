@@ -17,15 +17,15 @@ importers:
       globby:
         specifier: ^16.1.0
         version: 16.1.0
+      jiti:
+        specifier: ^2.6.1
+        version: 2.6.1
       ohash:
         specifier: ^2.0.11
         version: 2.0.11
       pathe:
         specifier: ^2.0.3
         version: 2.0.3
-      unstorage:
-        specifier: ^1.17.4
-        version: 1.17.4(@azure/identity@4.13.0)(db0@0.3.4(@libsql/client@0.17.0)(better-sqlite3@12.6.0)(drizzle-orm@1.0.0-beta.11-fc31a5f(@libsql/client@0.17.0)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.8)(better-sqlite3@12.6.0)(mssql@11.0.1)))(ioredis@5.9.1)
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^7.0.0

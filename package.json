@@ -1,7 +1,7 @@
 {
   "name": "nuxt-drizzle-migrations",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "packageManager": "pnpm@10.28.0",
   "description": "Automatic Drizzle migrations in Nuxt",
   "author": "Matthew Messinger <mattmess1221@gmail.com>",
@@ -48,9 +48,9 @@
     "@nuxt/kit": "^4.2.2",
     "consola": "^3.4.2",
     "globby": "^16.1.0",
+    "jiti": "^2.6.1",
     "ohash": "^2.0.11",
-    "pathe": "^2.0.3",
-    "unstorage": "^1.17.4"
+    "pathe": "^2.0.3"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.0.0",
