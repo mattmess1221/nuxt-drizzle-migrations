@@ -1,7 +1,5 @@
 import type { Migration } from './readMigration'
 import { journal, storageName } from '#drizzle-migrations'
-// eslint-disable-next-line ts/ban-ts-comment
-// @ts-ignore
 import { useDrizzle } from '#imports'
 import { consola } from 'consola'
 import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
