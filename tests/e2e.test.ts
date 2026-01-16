@@ -1,13 +1,18 @@
-import { unlink } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { mkdtemp, unlink } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { $fetch, setup } from '@nuxt/test-utils'
 import { afterAll, describe, expect, it } from 'vitest'
 
+async function createTempDir(prefix = '/') {
+  const ostmpdir = tmpdir()
+  const tempDir = join(ostmpdir, prefix)
+  return await mkdtemp(tempDir)
+}
+
 describe('e2e tests', async () => {
-  const dbFilePath = join(dirname(fileURLToPath(import.meta.url)), 'e2e.test.sqlite')
-  // Clean up the test database file before running tests
-  await unlink(dbFilePath).catch(() => {})
+  const tempDir = await createTempDir()
+  const dbFilePath = join(tempDir, 'e2e.test.sqlite')
   await setup({
     rootDir: './playground',
     env: {
