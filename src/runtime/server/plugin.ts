@@ -1,4 +1,6 @@
 import { journal, storageName } from '#drizzle-migrations'
+// eslint-disable-next-line ts/ban-ts-comment
+// @ts-ignore - server types are incorrect during dev, but works fine in upstream nuxt projects
 import { useDrizzle } from '#imports'
 import { consola } from 'consola'
 import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
