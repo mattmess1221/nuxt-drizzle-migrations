@@ -1,5 +1,5 @@
-import type { MigrationMeta } from 'drizzle-orm/migrator'
-import { journal, storageName } from '#drizzle-migrations'
+import type { MigrationConfig, MigrationMeta } from 'drizzle-orm/migrator'
+import { journal, migrationsConfig, storageName } from '#drizzle-migrations'
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-ignore - server types are incorrect during dev, but works fine in upstream nuxt projects
 import { useDrizzle } from '#imports'
@@ -11,7 +11,7 @@ const logger = consola.withTag('drizzle-migrations')
 
 interface $Drizzle {
   dialect: {
-    migrate: (migrations: MigrationMeta[], session: any, config: Record<any, any>) => any
+    migrate: (migrations: MigrationMeta[], session: any, config: Partial<MigrationConfig> | string) => any
   }
   session: any
 }
@@ -22,7 +22,7 @@ export default defineNitroPlugin(async (nitroApp) => {
   logger.info('Running migrations...')
 
   const migrations = await readMigrationStorage()
-  await db.dialect.migrate(migrations, db.session, { })
+  await db.dialect.migrate(migrations, db.session, migrationsConfig)
 
   // post migration tasks can be added here
   await nitroApp.hooks.callHook('drizzle:migrations:after')

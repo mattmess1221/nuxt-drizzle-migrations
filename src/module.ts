@@ -1,4 +1,5 @@
 import type { Config } from 'drizzle-kit'
+import type { MigrationConfig } from 'drizzle-orm/migrator'
 import { addServerImports, addServerPlugin, addServerTemplate, createResolver, defineNuxtModule, findPath, resolvePath, useLogger } from '@nuxt/kit'
 import { createJiti } from 'jiti'
 import { join } from 'pathe'
@@ -18,11 +19,25 @@ export interface ModuleOptions {
   /**
    * Path to the directory containing migration files.
    *
-   * If omitted, will try to read from {@linkcode configPath}.
+   * If omitted, will try to read from {@linkcode configPath} `out`.
    *
    * @default 'drizzle'
    */
   migrationsPath: string
+  /**
+   * Name of the table to store migration metadata.
+   * By default, reads from {@linkcode configPath} `migrations.table`.
+   *
+   * @default '__drizzle_migrations'
+   */
+  migrationsTable: string
+  /**
+   * Schema to use for the migrations table when supported by the dialect.
+   * By default, reads from {@linkcode configPath} `migrations.schema`.
+   *
+   * @default 'drizzle'
+   */
+  migrationsSchema: string
   /**
    * Name of the assets path to store migration files
    * @default 'migrations'
@@ -48,6 +63,10 @@ export default defineNuxtModule<ModuleOptions>().with({
     const drizzleConfig = configPath ? await readDrizzleConfig(configPath) : undefined
 
     const migrationsPath = await resolvePath(options.migrationsPath ?? drizzleConfig?.out ?? 'drizzle')
+    const migrationsConfig: Partial<MigrationConfig> = {
+      migrationsTable: options.migrationsTable ?? drizzleConfig?.migrations?.table,
+      migrationsSchema: options.migrationsSchema ?? drizzleConfig?.migrations?.schema,
+    }
 
     const journalFile = join(migrationsPath, 'meta/_journal.json')
     nuxt.hook('nitro:config', (config) => {
@@ -77,6 +96,7 @@ export default defineNuxtModule<ModuleOptions>().with({
 export { default as journal } from '#drizzle-migrations/journal'
 
 export const storageName = ${JSON.stringify(options.storageName)}
+export const migrationsConfig = ${JSON.stringify(migrationsConfig)}
       `,
     })
     addServerPlugin(resolve('./runtime/server/plugin'))

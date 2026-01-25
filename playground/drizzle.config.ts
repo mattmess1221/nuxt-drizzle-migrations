@@ -8,4 +8,7 @@ export default {
   dbCredentials: {
     url: process.env.DB_FILE_PATH || 'file:./playground.db',
   },
+  migrations: {
+    table: '__playground__drizzle_migrations',
+  },
 } satisfies Config
