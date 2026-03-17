@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.3.0
+
+[compare changes](https://github.com/mattmess1221/nuxt-drizzle-migrations/compare/v0.2.0...v0.3.0)
+
+### 🚀 Enhancements
+
+- Allow configuration of migration table and schema ([#2](https://github.com/mattmess1221/nuxt-drizzle-migrations/pull/2))
+- Log individual migrations only when they are run ([#3](https://github.com/mattmess1221/nuxt-drizzle-migrations/pull/3))
+
+### 🩹 Fixes
+
+- **playground:** Read env var for database url ([e48e840](https://github.com/mattmess1221/nuxt-drizzle-migrations/commit/e48e840))
+
+### 🌊 Types
+
+- **plugin:** Replace `Migration` with `MigrationMeta` from `drizzle-orm/migrator` ([942a011](https://github.com/mattmess1221/nuxt-drizzle-migrations/commit/942a011))
+
+### 🏡 Chore
+
+- **playground:** Update database configuration and module path in Nuxt config ([d4ac357](https://github.com/mattmess1221/nuxt-drizzle-migrations/commit/d4ac357))
+
+### ❤️ Contributors
+
+- Matthew Messinger <mattmess1221@gmail.com>
+
 ## v0.2.0
 
 [compare changes](https://github.com/mattmess1221/nuxt-drizzle-migrations/compare/v0.1.1...v0.2.0)

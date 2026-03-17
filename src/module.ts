@@ -1,4 +1,5 @@
 import type { Config } from 'drizzle-kit'
+import type { MigrationConfig } from 'drizzle-orm/migrator'
 import { existsSync } from 'node:fs'
 import { addServerImports, addServerPlugin, addServerTemplate, createResolver, defineNuxtModule, findPath, resolvePath, useLogger } from '@nuxt/kit'
 import { globby } from 'globby'
@@ -20,11 +21,25 @@ export interface ModuleOptions {
   /**
    * Path to the directory containing migration files.
    *
-   * If omitted, will try to read from {@linkcode configPath}.
+   * If omitted, will try to read from {@linkcode configPath} `out`.
    *
    * @default 'drizzle'
    */
   migrationsPath: string
+  /**
+   * Name of the table to store migration metadata.
+   * By default, reads from {@linkcode configPath} `migrations.table`.
+   *
+   * @default '__drizzle_migrations'
+   */
+  migrationsTable: string
+  /**
+   * Schema to use for the migrations table when supported by the dialect.
+   * By default, reads from {@linkcode configPath} `migrations.schema`.
+   *
+   * @default 'drizzle'
+   */
+  migrationsSchema: string
   /**
    * Name of the assets path to store migration files
    * @default 'migrations'
@@ -57,6 +72,10 @@ export default defineNuxtModule<ModuleOptions>().with({
     }
 
     logger.debug(`Detected migration folder version: ${migrationFolderVersion}`)
+    const migrationsConfig: Partial<MigrationConfig> = {
+      migrationsTable: options.migrationsTable ?? drizzleConfig?.migrations?.table,
+      migrationsSchema: options.migrationsSchema ?? drizzleConfig?.migrations?.schema,
+    }
 
     nuxt.hook('nitro:config', (config) => {
       config.serverAssets ??= []
@@ -84,6 +103,7 @@ export { default as journal } from '#drizzle-migrations/journal'
 export const storageName = ${JSON.stringify(options.storageName)}
 
 export const migrationFolderVersion = ${JSON.stringify(migrationFolderVersion)};
+export const migrationsConfig = ${JSON.stringify(migrationsConfig)}
 `,
     })
 

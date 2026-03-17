@@ -3,6 +3,7 @@ declare module '#drizzle-migrations' {
 
   export const storageName: string
   export const migrationFolderVersion: 2 | 3
+  export const migrationsConfig: Partial<import('drizzle-orm/migrator').MigrationConfig>
 }
 
 declare module '#drizzle-migrations/journal' {

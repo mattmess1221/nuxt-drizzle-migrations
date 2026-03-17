@@ -1,4 +1,5 @@
-import { journal, storageName } from '#drizzle-migrations'
+import type { MigrationConfig, MigrationMeta } from 'drizzle-orm/migrator'
+import { journal, migrationsConfig, storageName } from '#drizzle-migrations'
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-ignore - server types are incorrect during dev, but works fine in upstream nuxt projects
 import { useDrizzle } from '#imports'
@@ -8,16 +9,16 @@ import { digest } from 'ohash'
 
 const logger = consola.withTag('drizzle-migrations')
 
-interface Migration {
-  sql: string[]
-  bps: boolean
-  folderMillis: number
-  hash: string
+/**
+ * Internal migration metadata including the path (name).
+ */
+interface StoredMigration extends MigrationMeta {
+  path: string
 }
 
 interface $Drizzle {
   dialect: {
-    migrate: (migrations: Migration[], session: any, config: Record<any, any>) => any
+    migrate: (migrations: Iterable<MigrationMeta>, session: any, config: Partial<MigrationConfig> | string) => any
   }
   session: any
 }
@@ -25,24 +26,26 @@ interface $Drizzle {
 export default defineNitroPlugin(async (nitroApp) => {
   const db = useDrizzle() as unknown as $Drizzle
 
-  logger.info('Running migrations...')
-
-  const migrations = await readMigrationStorage()
-  await db.dialect.migrate(migrations, db.session, { })
+  const migrations = wrapMigrationsForLogging(await readMigrationStorage())
+  await db.dialect.migrate(migrations, db.session, migrationsConfig)
 
   // post migration tasks can be added here
   await nitroApp.hooks.callHook('drizzle:migrations:after')
-
-  logger.success('Migrations complete.')
 })
 
 /**
  * Reads migration queries from the given Unstorage instance.
- * Taken from 'drizzle-orm/migrator' but modified to read from unstorage instead of fs.
+ *
+ * Taken from 'drizzle-orm/migrator' with modifications.
+ *
+ * Differences:
+ * - reads from unstorage instead of filesystem
+ * - journal is imported directly via import aliases
+ * - storage path is included in return value
  */
-async function readMigrationStorage(): Promise<Migration[]> {
+async function readMigrationStorage(): Promise<StoredMigration[]> {
   const storage = useStorage<string>(`assets:${storageName}`)
-  const migrationQueries: Migration[] = []
+  const migrationQueries: StoredMigration[] = []
   for (const journalEntry of journal.entries) {
     const migrationPath = `${journalEntry.tag}.sql`
     const query = await storage.getItem(migrationPath)
@@ -51,6 +54,7 @@ async function readMigrationStorage(): Promise<Migration[]> {
     }
     const result = query.split('--> statement-breakpoint')
     migrationQueries.push({
+      path: migrationPath,
       sql: result,
       bps: journalEntry.breakpoints,
       folderMillis: journalEntry.when,
@@ -58,4 +62,25 @@ async function readMigrationStorage(): Promise<Migration[]> {
     })
   }
   return migrationQueries
+}
+
+/**
+ * Wrap stored migrations to log migrations.
+ */
+function* wrapMigrationsForLogging(migrations: StoredMigration[]): Generator<MigrationMeta> {
+  let migrationsRun = false
+  for (const { path, ...migration } of migrations) {
+    yield {
+      ...migration,
+      get sql() {
+        // `sql` is only accessed if the database migration is going to be run
+        migrationsRun = true
+        logger.info(`Running migration for '${path}' (hash: ${this.hash})`)
+        return migration.sql
+      },
+    }
+  }
+  if (migrationsRun) {
+    logger.success('Migrations complete.')
+  }
 }
