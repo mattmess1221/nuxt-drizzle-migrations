@@ -1,11 +1,11 @@
 import type { MigrationConfig, MigrationMeta } from 'drizzle-orm/migrator'
 import crypto from 'node:crypto'
+import { consola } from 'consola'
+import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
 import { migrationsConfig, storageName } from '#drizzle-migrations'
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-ignore - server types are incorrect during dev, but works fine in upstream nuxt projects
 import { useDrizzle } from '#imports'
-import { consola } from 'consola'
-import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
 
 const logger = consola.withTag('drizzle-migrations')
 
