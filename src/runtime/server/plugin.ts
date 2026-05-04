@@ -6,7 +6,6 @@ import { migrationsConfig, storageName } from '#drizzle-migrations'
 import { useDrizzle } from '#imports'
 import { consola } from 'consola'
 import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
-import { join } from 'pathe'
 
 const logger = consola.withTag('drizzle-migrations')
 
@@ -48,13 +47,10 @@ async function readMigrationStorage(runCallback?: (s: string) => void): Promise<
   const storage = useStorage<string>(`assets:${storageName}`)
   const migrationQueries: MigrationMeta[] = []
 
-  const migrations = []
-  for (const name of await storage.getKeys()) {
-    const path = join(name, 'migrations.sql')
-    if (await storage.hasItem(path)) {
-      migrations.push({ path, name })
-    }
-  }
+  const migrations = (await storage.getKeys())
+    .map(path => ({ path, name: path.split(':')[0]! }))
+    .filter(({ path }) => path.endsWith(':migration.sql'))
+
   migrations.sort((a, b) => a.name.localeCompare(b.name))
 
   for (const migration of migrations) {
@@ -68,13 +64,13 @@ async function readMigrationStorage(runCallback?: (s: string) => void): Promise<
 
     migrationQueries.push({
       get sql() {
-        runCallback?.(`Running migration for '${migrationPath}' (hash: ${this.hash})`)
+        runCallback?.(`Running migration for '${this.name}' (hash: ${this.hash})`)
         return result
       },
       bps: true,
       folderMillis: millis,
       hash: crypto.createHash('sha256').update(query).digest('hex'),
-      name: migrationPath,
+      name: migration.name,
     })
   }
   return migrationQueries
