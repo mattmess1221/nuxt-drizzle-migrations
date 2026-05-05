@@ -48,7 +48,6 @@
     "@nuxt/kit": "^4.4.4",
     "consola": "^3.4.2",
     "jiti": "^2.6.1",
-    "ohash": "^2.0.11",
     "pathe": "^2.0.3"
   },
   "devDependencies": {
