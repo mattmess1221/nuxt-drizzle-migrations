@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.1
+
+[compare changes](https://github.com/mattmess1221/nuxt-drizzle-migrations/compare/v0.3.0...v0.3.1)
+
+### 🩹 Fixes
+
+- Replace ohash.digest with crypto hashing to match upstream drizzle ([#13](https://github.com/mattmess1221/nuxt-drizzle-migrations/pull/13))
+
+### ❤️ Contributors
+
+- Matthew Messinger <mattmess1221@gmail.com>
+
 ## v0.3.0
 
 [compare changes](https://github.com/mattmess1221/nuxt-drizzle-migrations/compare/v0.2.0...v0.3.0)
