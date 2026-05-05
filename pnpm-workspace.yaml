@@ -1,6 +1,8 @@
+shamefullyHoist: true
 shellEmulator: true
 trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 1440
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - esbuild
+strictPeerDependencies: false
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true

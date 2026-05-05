@@ -2,7 +2,7 @@
   "name": "nuxt-drizzle-migrations",
   "type": "module",
   "version": "0.3.1",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@11.0.6",
   "description": "Automatic Drizzle migrations in Nuxt",
   "author": "Matthew Messinger <mattmess1221@gmail.com>",
   "license": "MIT",
