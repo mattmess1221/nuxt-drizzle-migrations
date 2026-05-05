@@ -1,7 +1,7 @@
 import type { MigrationConfig, MigrationMeta } from 'drizzle-orm/migrator'
+import crypto from 'node:crypto'
 import { consola } from 'consola'
 import { defineNitroPlugin, useStorage } from 'nitropack/runtime'
-import { digest } from 'ohash'
 import { journal, migrationsConfig, storageName } from '#drizzle-migrations'
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-ignore - server types are incorrect during dev, but works fine in upstream nuxt projects
@@ -58,7 +58,7 @@ async function readMigrationStorage(): Promise<StoredMigration[]> {
       sql: result,
       bps: journalEntry.breakpoints,
       folderMillis: journalEntry.when,
-      hash: digest(query),
+      hash: crypto.createHash('sha256').update(query).digest('hex'),
     })
   }
   return migrationQueries
