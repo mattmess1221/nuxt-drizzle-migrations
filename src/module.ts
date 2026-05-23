@@ -1,6 +1,8 @@
 import type { Config } from 'drizzle-kit'
 import type { MigrationConfig } from 'drizzle-orm/migrator'
+import { existsSync } from 'node:fs'
 import { addServerImports, addServerPlugin, addServerTemplate, createResolver, defineNuxtModule, findPath, resolvePath, useLogger } from '@nuxt/kit'
+import { globby } from 'globby'
 import { createJiti } from 'jiti'
 import { join } from 'pathe'
 import { name, version } from '../package.json'
@@ -63,22 +65,29 @@ export default defineNuxtModule<ModuleOptions>().with({
     const drizzleConfig = configPath ? await readDrizzleConfig(configPath) : undefined
 
     const migrationsPath = await resolvePath(options.migrationsPath ?? drizzleConfig?.out ?? 'drizzle')
+    const migrationFolderVersion = await getMigrationFilesVersion(migrationsPath)
+    if (migrationFolderVersion === null) {
+      logger.error('Could not determine migration folder version. Check that the migrationsPath is correct and contains valid migration files.')
+      return
+    }
+    if (migrationFolderVersion === 2) {
+      logger.error('Detected migration files version 2, which is not compatible with this module. Please upgrade your migration files to version 3 format by running `drizzle-kit up`.')
+      return
+    }
+
+    logger.debug(`Detected migration folder version: ${migrationFolderVersion}`)
     const migrationsConfig: Partial<MigrationConfig> = {
       migrationsTable: options.migrationsTable ?? drizzleConfig?.migrations?.table,
       migrationsSchema: options.migrationsSchema ?? drizzleConfig?.migrations?.schema,
     }
 
-    const journalFile = join(migrationsPath, 'meta/_journal.json')
     nuxt.hook('nitro:config', (config) => {
       config.serverAssets ??= []
       config.serverAssets.push({
         baseName: options.storageName,
         dir: migrationsPath,
-        pattern: '*.sql',
+        pattern: '**/*.sql',
       })
-
-      config.alias ??= {}
-      config.alias['#drizzle-migrations/journal'] = journalFile
     })
     nuxt.hook('nitro:prepare:types', ({ references }) => {
       references.push({ path: resolve('./runtime/server/types.d.ts') })
@@ -93,12 +102,11 @@ export default defineNuxtModule<ModuleOptions>().with({
     addServerTemplate({
       filename: '#drizzle-migrations',
       getContents: () => `
-export { default as journal } from '#drizzle-migrations/journal'
-
 export const storageName = ${JSON.stringify(options.storageName)}
 export const migrationsConfig = ${JSON.stringify(migrationsConfig)}
-      `,
+`,
     })
+
     addServerPlugin(resolve('./runtime/server/plugin'))
   },
 })
@@ -123,4 +131,26 @@ async function readDrizzleConfig(configPath: string) {
   catch (e) {
     logger.error(`Failed to read Drizzle config at ${configPath}: ${(e as Error).message}`)
   }
+}
+
+/**
+ * Determine the version of migration files in the given path.
+ *
+ * @param migrationsPath The path to the migrations folder
+ * @returns The migration files version (2 or 3), or null if it could not be determined
+ */
+async function getMigrationFilesVersion(migrationsPath: string): Promise<2 | 3 | null> {
+  const journalPath = join(migrationsPath, 'meta/_journal.json')
+  if (existsSync(journalPath)) {
+    // file indicates version 2
+    return 2
+  }
+
+  const migrations = await globby('*/migration.sql', { cwd: migrationsPath })
+  if (migrations.length > 0) {
+    return 3
+  }
+
+  // unknown version
+  return null
 }
