@@ -2,7 +2,7 @@
   "name": "nuxt-drizzle-migrations",
   "type": "module",
   "version": "0.3.1",
-  "packageManager": "pnpm@11.0.6",
+  "packageManager": "pnpm@11.5.1",
   "description": "Automatic Drizzle migrations in Nuxt",
   "author": "Matthew Messinger <mattmess1221@gmail.com>",
   "license": "MIT",
@@ -47,21 +47,21 @@
   "dependencies": {
     "@nuxt/kit": "^4.4.7",
     "consola": "^3.4.2",
-    "jiti": "^2.6.1",
+    "jiti": "^2.7.0",
     "pathe": "^2.0.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^8.2.0",
+    "@antfu/eslint-config": "^8.3.0",
     "@libsql/client": "^0.17.3",
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/test-utils": "^4.0.3",
     "changelogen": "^0.6.2",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
-    "eslint": "^10.3.0",
+    "eslint": "^10.4.1",
     "nuxt": "^4.4.7",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.5",
-    "vue-tsc": "^3.2.8"
+    "vitest": "^4.1.8",
+    "vue-tsc": "^3.3.3"
   }
 }
