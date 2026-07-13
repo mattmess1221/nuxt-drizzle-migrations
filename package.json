@@ -60,7 +60,7 @@
     "drizzle-orm": "^0.45.2",
     "eslint": "^10.4.1",
     "nuxt": "^4.4.7",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.8",
     "vue-tsc": "^3.3.3"
   }
